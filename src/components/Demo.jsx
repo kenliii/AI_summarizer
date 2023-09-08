@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 
 import { copy, linkIcon, loader, tick } from "../assets";
-
 import { useLazyGetSummaryQuery } from '../services/article';
 
 
@@ -11,6 +10,7 @@ const Demo = () => {
     summary:'',
   });
   const [allArticles, setAllArticles] = useState([]);
+  const [copied, setCopied] = useState("");
 
   const[getSummary, {error, isFetching}] = useLazyGetSummaryQuery();
 
@@ -42,6 +42,19 @@ const Demo = () => {
       console.log(newArticle);
     }
   }
+
+  const handleCopy = (copyUrl) => {
+    setCopied(copyUrl);
+    navigator.clipboard.writeText(copyUrl);
+    setTimeout(() => setCopied(false), 3000);
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.keyCode === 13) {
+      handleSubmit(e);
+    }
+  };
+
   return (
     <section className="mt-60 w-full max-w-xl">
       {/* Search */}
@@ -83,10 +96,10 @@ const Demo = () => {
                  onClick={() => setArticle(item)}
                  className="link_card"
                 >
-                <div className="copy_btn">
+                <div className="copy_btn" onClick={()=>handleCopy(item.url)}>
                   <img  
-                    src={copy}
-                    alt="copy_icon"
+                    src={copied === item.url ? tick : copy}
+                    alt={copied === item.url ? "tick_icon" : "copy_icon"}
                     className="w-[40%] h-[40%] object-contain"
 
                   />
@@ -104,7 +117,7 @@ const Demo = () => {
           <img src={loader} alt='loader' className='w-20 h-20 object-contain' />
         ) : error ? (
           <p className='font-inter font-bold text-black text-center'>
-            Well, that wasn't supposed to happen...
+            Well, that was not supposed to happen...
             <br />
             <span className='font-satoshi font-normal text-gray-700'>
               {error?.data?.error}
